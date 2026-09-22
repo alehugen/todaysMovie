@@ -43,10 +43,17 @@ did not work.
 | 24 combinations of dropout, L2 and learning rate | all within 68–73%, i.e. noise | kept sensible defaults |
 | Profile-informed features (declared genres, nostalgia curve) | +0.4 to −3.0 pp | kept, flagged as unproven |
 | Taste-centroid features (average of what you liked) | +0.4 pp | **implemented, then disabled by default** |
+| TF-IDF plot-similarity features | +2.2 / +1.1 / −0.4 pp | implemented, disabled — see below |
 
 The taste-centroid work lives in [`src/ml/taste.js`](src/ml/taste.js) with its full test suite. It is
 switched off because the measurement did not justify it, not because it was too hard — the code
 handles two subtle data-leakage traps described below.
+
+The plot-similarity work in [`src/ml/plotText.js`](src/ml/plotText.js) is a different case and worth
+being precise about: the benchmark that produced those numbers was **under-powered**. The synthetic
+taste signal it planted in the plots was present in only 19 of 182 movies, so a 16-movie sample
+contained one or two examples of it. The result is therefore **inconclusive rather than negative**,
+and the feature is off until a properly calibrated experiment says otherwise.
 
 > The lesson the numbers keep repeating: **no amount of model tuning competes with more labelled
 > data.** That is why the daily feedback loop matters more than the architecture.
@@ -205,8 +212,9 @@ being used — one candidate palette failed by 0.03 and was replaced.
 - **Content-based only.** With a single local user there is no collaborative signal, so the model
   cannot learn "people who liked X also liked Y".
 - **The free OMDb tier allows 1,000 requests a day**, which shapes the caching and discovery budget.
-- **Plot text is fetched but barely used.** Sentence embeddings would add genuinely new information;
-  the trade-off is a ~25 MB model download.
+- **Plot text is only partly exploited.** A TF-IDF pipeline exists and is tested, but it is disabled
+  pending a better-powered experiment. Sentence embeddings would extract far more from the same text
+  at the cost of a ~25 MB model download.
 
 ## Author
 
