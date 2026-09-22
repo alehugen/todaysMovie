@@ -178,7 +178,7 @@ email with an activation link that must be clicked before it works.
 
 ```bash
 npm run test        # watch mode
-npm run test:run    # single run — 266 tests
+npm run test:run    # single run — 279 tests
 npm run coverage
 npm run build
 ```
@@ -191,7 +191,7 @@ npm run build
 | Styling | Tailwind CSS v4 with a three-layer token design system |
 | ML | TensorFlow.js 4 |
 | Build | Vite 8 |
-| Tests | Vitest (jsdom), 266 tests |
+| Tests | Vitest (jsdom), 279 tests |
 | Storage | `localStorage` for the profile, IndexedDB for the movie cache and the model |
 
 The design system is worth a look: primitives → semantic tokens → utilities. Dark mode works with
