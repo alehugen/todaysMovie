@@ -60,6 +60,9 @@ and the feature is off until a properly calibrated experiment says otherwise.
 
 ## The machine learning pipeline
 
+> A step-by-step walkthrough of the pipeline, written to be explained out loud,
+> lives in [`src/ml/README.md`](src/ml/README.md).
+
 ```
 OMDb JSON            "Runtime": "142 min"   "imdbVotes": "2,800,000"   "Metascore": "N/A"
       ↓ normalisation
