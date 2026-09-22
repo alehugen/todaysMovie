@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --brand-50: #eefbf5;
+  --brand-100: #d6f5e5;
+  --brand-200: #b6ecd0;
+  --brand-300: #88ddb1;
+  --brand-400: #64d39a;
+  --brand-500: #45cb85;
+  --brand-600: #30b070;
+  --brand-700: #258d5b;
+  --brand-800: #206f4a;
+  --brand-900: #1c543b;
+  --brand-950: #113224;
+
+  --neutral-0: #ffffff;
+  --neutral-50: #f5fafa;
+  --neutral-100: #ebf4f4;
+  --neutral-200: #dae7e7;
+  --neutral-300: #bdd1d1;
+  --neutral-400: #90adad;
+  --neutral-500: #698c8c;
+  --neutral-600: #4f7272;
+  --neutral-700: #365959;
+  --neutral-800: #234343;
+  --neutral-900: #153131;
+  --neutral-950: #0c1d1d;
+
+  --star-400: #fbbf24;
+
+  --danger-100: #fee2e2;
+  --danger-400: #fca5a5;
+  --danger-700: #b91c1c;
+  --danger-950: #341111;
+}
+
+:root {
+  --app-surface: var(--neutral-0);
+  --app-raised: var(--neutral-100);
+  --app-outline: var(--neutral-200);
+  --app-content: var(--neutral-900);
+  --app-muted: var(--neutral-600);
+
+  --app-brand: var(--brand-500);
+  --app-brand-hover: var(--brand-600);
+  --app-brand-contrast: var(--neutral-950);
+  --app-brand-text: var(--brand-800);
+  --app-brand-subtle: var(--brand-50);
+
+  --app-danger: var(--danger-700);
+  --app-danger-contrast: var(--neutral-0);
+  --app-danger-subtle: var(--danger-100);
+
+  --app-overlay: rgb(12 29 29 / 0.78);
+  --app-overlay-content: var(--neutral-0);
+  --app-star: var(--star-400);
+
+  --app-ring: var(--brand-600);
+  --app-shadow-card: 0 1px 2px rgb(12 29 29 / 0.06), 0 8px 24px -14px rgb(12 29 29 / 0.2);
+  --app-shadow-card-hover: 0 2px 4px rgb(12 29 29 / 0.08), 0 18px 36px -16px rgb(12 29 29 / 0.35);
+
+  color-scheme: light;
+}
+
+.dark {
+  --app-surface: var(--neutral-950);
+  --app-raised: var(--neutral-900);
+  --app-outline: var(--neutral-800);
+  --app-content: var(--neutral-50);
+  --app-muted: var(--neutral-400);
+
+  --app-brand: var(--brand-500);
+  --app-brand-hover: var(--brand-400);
+  --app-brand-contrast: var(--neutral-950);
+  --app-brand-text: var(--brand-400);
+  --app-brand-subtle: var(--neutral-800);
+
+  --app-danger: var(--danger-400);
+  --app-danger-contrast: var(--neutral-950);
+  --app-danger-subtle: var(--danger-950);
+
+  --app-overlay: rgb(0 0 0 / 0.72);
+  --app-overlay-content: var(--neutral-0);
+  --app-star: var(--star-400);
+
+  --app-ring: var(--brand-400);
+  --app-shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -14px rgb(0 0 0 / 0.65);
+  --app-shadow-card-hover: 0 2px 6px rgb(0 0 0 / 0.5), 0 18px 36px -16px rgb(0 0 0 / 0.85);
+
+  color-scheme: dark;
+}
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+}
+
+@theme inline {
+  --color-surface: var(--app-surface);
+  --color-raised: var(--app-raised);
+  --color-outline: var(--app-outline);
+  --color-content: var(--app-content);
+  --color-muted: var(--app-muted);
+
+  --color-brand: var(--app-brand);
+  --color-brand-hover: var(--app-brand-hover);
+  --color-brand-contrast: var(--app-brand-contrast);
+  --color-brand-text: var(--app-brand-text);
+  --color-brand-subtle: var(--app-brand-subtle);
+
+  --color-danger: var(--app-danger);
+  --color-danger-contrast: var(--app-danger-contrast);
+  --color-danger-subtle: var(--app-danger-subtle);
+
+  --color-overlay: var(--app-overlay);
+  --color-overlay-content: var(--app-overlay-content);
+  --color-star: var(--app-star);
+
+  --color-ring: var(--app-ring);
+
+  --shadow-card: var(--app-shadow-card);
+  --shadow-card-hover: var(--app-shadow-card-hover);
+}
+
+html {
+  background-color: var(--app-surface);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  .focus-ring {
+    @apply outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
