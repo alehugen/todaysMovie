@@ -1,7 +1,12 @@
 # Today's Movie
 
 A movie recommender that trains a neural network **in your browser**, from your own ratings.
-No account, no backend, no data leaving your machine.
+No account, and your ratings never leave your device — the model is trained, stored and run
+entirely on the client.
+
+The one server-side piece is a ~40-line serverless function that proxies the OMDb API, and it
+exists for a single reason: an API key shipped to the browser is a public key, whatever the
+environment variable is called.
 
 Built with Vue 3, Tailwind CSS v4 and TensorFlow.js. Movie data comes from the
 [OMDb API](https://www.omdbapi.com/).
@@ -139,7 +144,15 @@ src/
 ├── services/       plain functions, no Vue: OMDb client, cache, sampler, catalog builder
 ├── ml/             plain functions, no Vue: features, model, training, inference, ranking
 └── data/           the seed catalog (182 verified movies)
+
+api/
+└── omdb.js         serverless proxy — the only code that ever sees the API key
 ```
+
+`src/ml/pipelineConfig.js` looks redundant until you check the bundle: the view needs to know how
+wide a feature vector is, and importing that constant from the trainer would drag all of
+TensorFlow.js onto the main thread. Keeping it in a dependency-free module is what holds the main
+bundle at ~110 kB.
 
 **Nothing in `services/` or `ml/` imports Vue.** That is what lets both run unchanged inside Web
 Workers, and it is what makes them testable without mounting a single component.
@@ -161,7 +174,12 @@ out of order without being mixed up. The client lives in
 
 ### Working around the OMDb API
 
-OMDb has no browse or discovery endpoint, and it **returns HTTP 200 even when it fails**:
+The browser never calls OMDb directly. It calls `/api/omdb`, which adds the key server-side and
+forwards only a whitelist of parameters — without that whitelist the endpoint would be an open
+proxy, letting anyone spend the quota on arbitrary queries. Responses carry an edge-cache header,
+which protects the daily quota better than client caching alone.
+
+OMDb itself has no browse or discovery endpoint, and it **returns HTTP 200 even when it fails**:
 
 ```json
 { "Response": "False", "Error": "Invalid API key!" }
@@ -183,12 +201,21 @@ cp .env.example .env.local     # then paste your free OMDb key
 npm run dev
 ```
 
+Note the variable is `OMDB_API_KEY`, deliberately **without** a `VITE_` prefix. Vite only exposes
+prefixed variables to client code, so this one stays on the server. In development the Vite dev
+server mounts the same proxy handler at `/api/omdb`, so there is a single implementation and a
+single code path in both environments.
+
+Deploying to Vercel needs the same variable set in the project's environment settings. Vercel warns
+about `VITE_`-prefixed variables being public — that warning is correct, and this is the fix it is
+asking for.
+
 Get a free key at [omdbapi.com/apikey.aspx](https://www.omdbapi.com/apikey.aspx). The key arrives by
 email with an activation link that must be clicked before it works.
 
 ```bash
 npm run test        # watch mode
-npm run test:run    # single run — 279 tests
+npm run test:run    # single run — 288 tests
 npm run coverage
 npm run build
 ```
@@ -201,7 +228,7 @@ npm run build
 | Styling | Tailwind CSS v4 with a three-layer token design system |
 | ML | TensorFlow.js 4 |
 | Build | Vite 8 |
-| Tests | Vitest (jsdom), 279 tests |
+| Tests | Vitest (jsdom), 288 tests |
 | Storage | `localStorage` for the profile, IndexedDB for the movie cache and the model |
 
 The design system is worth a look: primitives → semantic tokens → utilities. Dark mode works with
@@ -215,6 +242,8 @@ being used — one candidate palette failed by 0.03 and was replaced.
 - **Content-based only.** With a single local user there is no collaborative signal, so the model
   cannot learn "people who liked X also liked Y".
 - **The free OMDb tier allows 1,000 requests a day**, which shapes the caching and discovery budget.
+- **The proxy has no rate limiting.** It is quota protection by obscurity plus an edge cache; a
+  public deployment with real traffic would need per-IP limits.
 - **Plot text is only partly exploited.** A TF-IDF pipeline exists and is tested, but it is disabled
   pending a better-powered experiment. Sentence embeddings would extract far more from the same text
   at the cost of a ~25 MB model download.

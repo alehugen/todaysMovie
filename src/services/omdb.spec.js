@@ -27,31 +27,36 @@ function mockOmdbResponse(payload, { ok = true, status = 200 } = {}) {
 }
 
 function requestedUrl() {
-  return new URL(global.fetch.mock.calls[0][0])
+  // The client builds a relative URL pointing at our own proxy, so parsing it
+  // needs a base. Any base works — only the path and the query matter.
+  return new URL(global.fetch.mock.calls[0][0], 'https://todays-movie.test')
 }
 
 describe('omdb service', () => {
-  beforeEach(() => {
-    vi.stubEnv('VITE_OMDB_API_KEY', 'test-key')
-  })
-
   afterEach(() => {
-    vi.unstubAllEnvs()
     vi.restoreAllMocks()
   })
 
   describe('request building', () => {
-    it('sends the api key, the term and the movie filter', async () => {
+    it('goes through our own proxy, never straight to OMDb', async () => {
       mockOmdbResponse({ Response: 'True', Search: [], totalResults: '0' })
 
       await searchMovies('matrix', { page: 2 })
       const url = requestedUrl()
 
-      expect(url.origin + url.pathname).toBe('https://www.omdbapi.com/')
-      expect(url.searchParams.get('apikey')).toBe('test-key')
+      expect(url.pathname).toBe('/api/omdb')
       expect(url.searchParams.get('s')).toBe('matrix')
       expect(url.searchParams.get('type')).toBe('movie')
       expect(url.searchParams.get('page')).toBe('2')
+    })
+
+    it('never sends an api key from the browser', async () => {
+      mockOmdbResponse({ Response: 'True', Search: [], totalResults: '0' })
+
+      await searchMovies('matrix')
+
+      expect(requestedUrl().searchParams.has('apikey')).toBe(false)
+      expect(global.fetch.mock.calls[0][0]).not.toMatch(/omdbapi\.com/)
     })
 
     it('asks for a single title by id', async () => {
@@ -62,17 +67,17 @@ describe('omdb service', () => {
       expect(requestedUrl().searchParams.get('i')).toBe('tt0111161')
     })
 
-    it('fails fast when the api key is missing', async () => {
-      vi.stubEnv('VITE_OMDB_API_KEY', '')
-      mockOmdbResponse({})
+    it('reports a proxy that was deployed without its key', async () => {
+      mockOmdbResponse(
+        { Response: 'False', Error: 'The server is missing its OMDb API key.' },
+        { ok: false, status: 500 },
+      )
 
-      await expect(searchMovies('matrix')).rejects.toMatchObject({ code: 'missing_api_key' })
-      expect(global.fetch).not.toHaveBeenCalled()
+      await expect(searchMovies('matrix')).rejects.toMatchObject({ code: 'http_error' })
     })
 
-    it('fails fast when the key is still the placeholder', async () => {
-      vi.stubEnv('VITE_OMDB_API_KEY', 'PASTE_YOUR_KEY_HERE')
-      mockOmdbResponse({})
+    it('maps the proxy missing-key message when it arrives with a 200', async () => {
+      mockOmdbResponse({ Response: 'False', Error: 'The server is missing its OMDb API key.' })
 
       await expect(searchMovies('matrix')).rejects.toMatchObject({ code: 'missing_api_key' })
     })

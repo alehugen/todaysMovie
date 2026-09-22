@@ -23,8 +23,8 @@ import {
   saveModel,
   trainModel,
 } from './model'
-import { FEATURE_COUNT } from './features'
-import { TASTE_FEATURE_COUNT, augmentTrainingSet, buildTasteProfile } from './taste'
+import { USE_TASTE_FEATURES } from './pipelineConfig'
+import { augmentTrainingSet, buildTasteProfile } from './taste'
 
 // Reported to the UI so the progress bar can label what is happening.
 export const TRAINING_PHASES = {
@@ -34,19 +34,6 @@ export const TRAINING_PHASES = {
 }
 
 export const MIN_TRAINING_EXAMPLES = 4
-
-/**
- * The taste-centroid features were implemented, measured (+0.4 pp, i.e. noise) and
- * switched off. The code and its tests are kept because they demonstrate the two
- * leakage traps described in `taste.js`; flipping this constant re-enables them.
- */
-export const USE_TASTE_FEATURES = false
-
-// Single source of truth for the width of a feature vector. The UI compares it to
-// the width stored with a saved model, so a pipeline change forces a retrain
-// instead of silently feeding a model the wrong number of inputs.
-export const PIPELINE_FEATURE_COUNT =
-  FEATURE_COUNT + (USE_TASTE_FEATURES ? TASTE_FEATURE_COUNT : 0)
 
 /**
  * Refuses to train on a dataset that cannot teach anything, and says why in plain

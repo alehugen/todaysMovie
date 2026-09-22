@@ -11,7 +11,7 @@ import { DAILY_SELECTION_SIZE, buildDailySelection, dateKey } from '@/ml/dailySe
 import { buildFeatureVector, buildTrainingSet } from '@/ml/features'
 import { rankByScore } from '@/ml/ranking'
 import { augmentCandidates } from '@/ml/taste'
-import { PIPELINE_FEATURE_COUNT, USE_TASTE_FEATURES } from '@/ml/trainingRunner'
+import { PIPELINE_FEATURE_COUNT, USE_TASTE_FEATURES } from '@/ml/pipelineConfig'
 import { getCandidateCatalog, getManyMovieDetails } from '@/services/movieCatalog'
 import { sampleMoviesForProfile } from '@/services/movieSampler'
 import { useUserProfileStore } from '@/stores/userProfile'

@@ -1,6 +1,8 @@
-const OMDB_BASE_URL = 'https://www.omdbapi.com/'
+// The browser never talks to omdbapi.com directly. It calls our own serverless
+// proxy, which holds the API key server-side — see api/omdb.js. A key shipped to
+// the client is a public key, whatever the variable is called.
+const OMDB_ENDPOINT = '/api/omdb'
 const NOT_AVAILABLE = 'N/A'
-const PLACEHOLDER_KEY = 'PASTE_YOUR_KEY_HERE'
 
 const ERROR_CODES_BY_MESSAGE = {
   'Movie not found!': 'not_found',
@@ -9,6 +11,7 @@ const ERROR_CODES_BY_MESSAGE = {
   'Invalid API key!': 'invalid_api_key',
   'Request limit reached!': 'rate_limited',
   'No API key provided.': 'missing_api_key',
+  'The server is missing its OMDb API key.': 'missing_api_key',
 }
 
 export class OmdbError extends Error {
@@ -20,28 +23,15 @@ export class OmdbError extends Error {
   }
 }
 
-function getApiKey() {
-  const apiKey = import.meta.env.VITE_OMDB_API_KEY
-
-  if (!apiKey || apiKey === PLACEHOLDER_KEY) {
-    throw new OmdbError('Missing OMDb API key. Set VITE_OMDB_API_KEY in your .env.local file.', {
-      code: 'missing_api_key',
-    })
-  }
-
-  return apiKey
-}
-
 function buildRequestUrl(params) {
-  const url = new URL(OMDB_BASE_URL)
-  url.searchParams.set('apikey', getApiKey())
+  const query = new URLSearchParams()
 
   for (const [name, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === '') continue
-    url.searchParams.set(name, String(value))
+    query.set(name, String(value))
   }
 
-  return url.toString()
+  return `${OMDB_ENDPOINT}?${query}`
 }
 
 function toErrorCode(message) {
