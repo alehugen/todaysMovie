@@ -26,6 +26,43 @@ Built with Vue 3, Tailwind CSS v4 and TensorFlow.js. Movie data comes from the
 5. **The catalog grows by itself**, discovering new movies from OMDb in a background worker so the
    app never runs out of things to suggest.
 
+## A walk through the app
+
+**Step 1 — who is watching.** The birth year is not decoration: it decides which decades the
+questionnaire samples from, so a viewer born in 1993 rates movies from the 1990s, 2000s, 2010s and
+2020s rather than twenty films from the last five years. Genres are used to pick *which* movies, and
+also become a feature the model reads.
+
+![Onboarding, step one](docs/screenshots/01-onboarding-profile.png)
+
+**Step 2 — the training data.** Twenty movies, three possible answers. "Haven't seen" is kept
+separate from a dislike on purpose: a guessed label is worse than a missing one, because it teaches
+the model something false with full confidence. Marking a movie as unseen swaps in a different one,
+so the minimum is always reachable.
+
+![Onboarding, step two](docs/screenshots/02-onboarding-ratings.png)
+
+**Training.** Roughly 200 epochs plus twelve more models for cross-validation, all inside a Web
+Worker. The page stays fully interactive while this runs — scroll, hover, switch themes. On the main
+thread the same work would freeze the tab.
+
+![Training in a background thread](docs/screenshots/03-training.png)
+
+**The daily pick.** One highlight, four alternatives, chosen once per calendar day so a refresh does
+not reshuffle it. The percentage is the model's own probability. Two details worth noticing: the
+card tagged **WILDCARD** is the exploration slot, a movie drawn at random regardless of score so the
+model's blind spots get tested; and the red banner is the app admitting that this particular model
+scored below its trust threshold. It says so instead of presenting a confident number it cannot back.
+
+![The daily pick](docs/screenshots/04-daily-pick.png)
+
+**The library.** Every rating is a training example, and everything already shown is remembered so it
+never comes back. This is the loop that matters: the questionnaire produces ~20 examples, and daily
+use is what grows the dataset — which the measurements say is worth far more than any change to the
+model.
+
+![The library](docs/screenshots/05-library.png)
+
 ## Why it is more than a tutorial project
 
 The interesting part is not that it uses a neural network — it is that **every design decision was

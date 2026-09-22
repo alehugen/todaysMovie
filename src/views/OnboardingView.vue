@@ -65,7 +65,7 @@ function handleFinish() {
           inputmode="numeric"
           :min="earliestBirthYear"
           :max="latestBirthYear"
-          placeholder="1993"
+          placeholder="e.g. 1993"
           class="focus-ring mt-2 w-full rounded-control border border-outline bg-raised px-3 py-2 transition-colors placeholder:text-muted"
         />
       </div>
